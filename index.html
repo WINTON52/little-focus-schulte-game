@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7faec" />
+    <title>小小专注家</title>
+    <style>
+      :root {
+        color: #285d79;
+        background: #f7faec;
+        font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; min-height: 100vh; background: linear-gradient(145deg, #fffbd9, #edfbf3 58%, #e4f8ff); }
+      button { font: inherit; }
+      .app { width: min(100%, 900px); min-height: 100vh; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px max(26px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; }
+      .hero { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 2px 0 18px; }
+      .brand { margin: 0; font-size: clamp(28px, 6vw, 42px); letter-spacing: .04em; color: #24617f; }
+      .back { border: 0; border-radius: 999px; padding: 12px 18px; color: #2b647e; background: rgba(255,255,255,.9); box-shadow: 0 4px 0 #d5e6e4; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+      .back:active, .action:active, .level:active, .tile:active { transform: translateY(3px); box-shadow: none; }
+      .home-card, .complete-card { width: min(100%, 650px); padding: clamp(26px, 6vw, 46px); border-radius: 30px; text-align: center; background: rgba(255,255,255,.87); box-shadow: 0 10px 30px rgba(41, 101, 108, .12); }
+      .mascot { font-size: 56px; line-height: 1; }
+      h2 { margin: 12px 0 8px; font-size: clamp(28px, 5vw, 38px); color: #285d79; }
+      p { margin: 0; line-height: 1.65; font-size: clamp(17px, 3vw, 21px); color: #5d7d85; }
+      .level-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+      .level { min-height: 82px; border: 0; border-radius: 22px; color: #285d79; background: #fff; box-shadow: 0 7px 0 #dce9e5; font-size: 21px; font-weight: 900; cursor: pointer; touch-action: manipulation; }
+      .level small { display: block; margin-top: 4px; font-size: 14px; color: #7c989c; }
+      .level.current { color: #fff; background: #ff9f3f; box-shadow: 0 7px 0 #dc7b1e; }
+      .level.current small { color: #fff7e7; }
+      .level.locked { color: #a6b4b6; background: #eef2f0; box-shadow: 0 7px 0 #d7e0dc; cursor: not-allowed; }
+      .progress-note { margin-top: 22px; font-size: 15px; }
+      .game { width: 100%; display: flex; flex-direction: column; align-items: center; }
+      .game-top { width: min(100%, 720px); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; margin-bottom: 16px; }
+      .find-label { margin: 0; font-size: 20px; font-weight: 900; color: #5c7e88; }
+      .target-number { margin: -3px 0 0; color: #ed6d2f; font-size: clamp(54px, 11vw, 86px); font-weight: 950; line-height: 1; font-variant-numeric: tabular-nums; }
+      .timer { padding: 13px 20px; border-radius: 22px; color: #95631e; background: #fff1bf; font-size: clamp(21px, 4vw, 29px); font-weight: 900; font-variant-numeric: tabular-nums; }
+      .message { min-height: 34px; margin: 0 0 14px; color: #4e8179; font-size: clamp(19px, 3.5vw, 28px); font-weight: 900; text-align: center; }
+      .message.wrong { color: #d27148; }
+      .board { width: min(94vw, 560px); display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: clamp(5px, 1.3vw, 13px); }
+      .tile { aspect-ratio: 1; min-width: 0; padding: 0; border: 0; border-radius: clamp(12px, 2.8vw, 25px); color: #2e637f; background: #fff; box-shadow: 0 7px 0 #dce9e5; font-size: var(--tile-font-size); font-weight: 950; line-height: 1; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: manipulation; }
+      .tile.done { color: #fff; background: #ff9f3f; box-shadow: 0 7px 0 #dc7b1e; }
+      .tile:focus-visible, .level:focus-visible, .action:focus-visible, .back:focus-visible { outline: 4px solid #ffc95a; outline-offset: 3px; }
+      .complete-card { margin-top: clamp(35px, 10vh, 110px); }
+      .action { margin-top: 24px; padding: 16px 25px; border: 0; border-radius: 999px; color: #fff; background: #ff8342; box-shadow: 0 6px 0 #da6827; font-size: 21px; font-weight: 900; cursor: pointer; touch-action: manipulation; }
+      .best { margin-top: 18px; color: #8a7061; font-size: 16px; }
+      @media (min-width: 768px) {
+        .app { padding-left: 44px; padding-right: 44px; }
+        .level-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .board { width: min(72vw, 560px); }
+      }
+      @media (max-width: 420px) {
+        .app { padding-left: 14px; padding-right: 14px; }
+        .hero { margin-bottom: 12px; }
+        .back { padding: 10px 13px; }
+        .tile { box-shadow: 0 5px 0 #dce9e5; }
+        .tile.done { box-shadow: 0 5px 0 #dc7b1e; }
+      }
+      @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <main class="app" id="app" aria-live="polite"></main>
+    <script>
+      const MIN_LEVEL = 3;
+      const MAX_LEVEL = 10;
+      const UNLOCKED_KEY = "little-focus-unlocked";
+      const BEST_PREFIX = "little-focus-best-";
+      const app = document.querySelector("#app");
+
+      const state = { screen: "home", size: MIN_LEVEL, board: [], next: 1, startedAt: null, elapsed: 0, message: "", wrong: false, timerId: null, advanceId: null };
+
+      function readUnlockedLevel() {
+        try {
+          const saved = Number.parseInt(localStorage.getItem(UNLOCKED_KEY), 10);
+          return Number.isInteger(saved) ? Math.min(MAX_LEVEL, Math.max(MIN_LEVEL, saved)) : MIN_LEVEL;
+        } catch { return MIN_LEVEL; }
+      }
+
+      function unlockedLevel() { return readUnlockedLevel(); }
+
+      function unlockNext(size) {
+        const current = unlockedLevel();
+        const next = size === current ? Math.min(MAX_LEVEL, size + 1) : current;
+        if (next > current) {
+          try { localStorage.setItem(UNLOCKED_KEY, String(next)); } catch { /* Progress still works this time. */ }
+        }
+      }
+
+      function bestFor(size) {
+        try { return Number.parseInt(localStorage.getItem(BEST_PREFIX + size), 10) || null; } catch { return null; }
+      }
+
+      function saveBest(size, milliseconds) {
+        const old = bestFor(size);
+        if (!old || milliseconds < old) {
+          try { localStorage.setItem(BEST_PREFIX + size, String(milliseconds)); } catch { /* Best time is optional. */ }
+          return true;
+        }
+        return false;
+      }
+
+      function shuffle(values) {
+        const copy = [...values];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function stopTimers() {
+        window.clearInterval(state.timerId);
+        window.clearTimeout(state.advanceId);
+        state.timerId = null;
+        state.advanceId = null;
+      }
+
+      function timeText(milliseconds) { return (milliseconds / 1000).toFixed(1) + " 秒"; }
+
+      function renderHeader(showBack) {
+        return `<header class="hero"><h1 class="brand">小小专注家</h1>${showBack ? '<button class="back" data-action="home" type="button">关卡</button>' : ""}</header>`;
+      }
+
+      function renderHome() {
+        const unlocked = unlockedLevel();
+        const levels = Array.from({ length: MAX_LEVEL - MIN_LEVEL + 1 }, (_, index) => MIN_LEVEL + index).map((size) => {
+          const locked = size > unlocked;
+          const best = bestFor(size);
+          const status = locked ? "还没解锁" : size === unlocked ? "现在练习" : "可以回练";
+          return `<button class="level ${locked ? "locked" : size === unlocked ? "current" : ""}" data-level="${size}" type="button" ${locked ? "disabled" : ""}>${size} × ${size}<small>${locked ? "🔒 " : ""}${status}${best ? " · 最快 " + timeText(best) : ""}</small></button>`;
+        }).join("");
+        app.innerHTML = `${renderHeader(false)}<section class="home-card"><div class="mascot" aria-hidden="true">☀️</div><h2>准备好了吗？</h2><p>从 1 开始，按顺序找到所有数字。<br>每完成一关，下一关就会打开！</p><div class="level-grid">${levels}</div><p class="progress-note">进度和最快时间会保存在这台 iPad 上。</p></section>`;
+      }
+
+      function renderGame() {
+        const size = state.size;
+        const fontSize = Math.min(54, Math.max(15, Math.floor(255 / size)));
+        app.innerHTML = `${renderHeader(true)}<section class="game"><div class="game-top"><div><p class="find-label">现在要找</p><p class="target-number">${state.next}</p></div><div class="timer">${timeText(state.elapsed)}</div></div><p class="message${state.wrong ? " wrong" : ""}">${state.message || `慢慢找，按顺序点数字！`}</p><div class="board" style="--columns:${size}; --tile-font-size:${fontSize}px" aria-label="${size} 乘 ${size} 数字棋盘"></div></section>`;
+        const board = app.querySelector(".board");
+        state.board.forEach((value) => {
+          const tile = document.createElement("button");
+          tile.type = "button";
+          tile.className = `tile${value < state.next ? " done" : ""}`;
+          tile.textContent = value;
+          tile.dataset.value = value;
+          tile.disabled = value < state.next;
+          tile.setAttribute("aria-label", `数字 ${value}`);
+          board.append(tile);
+        });
+      }
+
+      function renderComplete() {
+        const best = bestFor(MAX_LEVEL);
+        app.innerHTML = `${renderHeader(true)}<section class="complete-card"><div class="mascot" aria-hidden="true">🏆</div><h2>太棒啦！全部完成！</h2><p>你已经完成了 3 × 3 到 10 × 10 的所有练习。</p>${best ? `<p class="best">10 × 10 最快：${timeText(best)}</p>` : ""}<button class="action" data-action="home" type="button">回到关卡</button></section>`;
+      }
+
+      function render() {
+        if (state.screen === "home") renderHome();
+        else if (state.screen === "complete") renderComplete();
+        else renderGame();
+      }
+
+      function startGame(size) {
+        if (size > unlockedLevel() || size < MIN_LEVEL || size > MAX_LEVEL) return;
+        stopTimers();
+        state.screen = "game";
+        state.size = size;
+        state.board = shuffle(Array.from({ length: size * size }, (_, index) => index + 1));
+        state.next = 1;
+        state.startedAt = null;
+        state.elapsed = 0;
+        state.message = "";
+        state.wrong = false;
+        render();
+      }
+
+      function startClock() {
+        if (state.startedAt) return;
+        state.startedAt = performance.now();
+        state.timerId = window.setInterval(() => {
+          state.elapsed = performance.now() - state.startedAt;
+          const clock = app.querySelector(".timer");
+          if (clock) clock.textContent = timeText(state.elapsed);
+        }, 100);
+      }
+
+      function tapTile(value) {
+        if (state.screen !== "game") return;
+        if (value !== state.next) {
+          state.message = `再看看，要找的是 ${state.next} 哦！`;
+          state.wrong = true;
+          render();
+          return;
+        }
+        startClock();
+        state.next += 1;
+        state.wrong = false;
+        const total = state.size * state.size;
+        if (state.next <= total) {
+          state.message = `真棒！现在找 ${state.next}`;
+          render();
+          return;
+        }
+        state.elapsed = performance.now() - state.startedAt;
+        window.clearInterval(state.timerId);
+        saveBest(state.size, state.elapsed);
+        unlockNext(state.size);
+        if (state.size < MAX_LEVEL) {
+          state.message = `完成啦！马上进入 ${state.size + 1} × ${state.size + 1}`;
+          render();
+          state.advanceId = window.setTimeout(() => startGame(state.size + 1), 900);
+        } else {
+          state.screen = "complete";
+          render();
+        }
+      }
+
+      app.addEventListener("click", (event) => {
+        const action = event.target.closest("[data-action]")?.dataset.action;
+        if (action === "home") {
+          stopTimers();
+          state.screen = "home";
+          render();
+          return;
+        }
+        const level = event.target.closest("[data-level]")?.dataset.level;
+        if (level) startGame(Number(level));
+        const value = event.target.closest("[data-value]")?.dataset.value;
+        if (value) tapTile(Number(value));
+      });
+
+      render();
+    </script>
+  </body>
+</html>
