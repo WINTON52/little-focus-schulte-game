@@ -29,3 +29,16 @@ test("the page includes iPad-friendly board sizing", async () => {
   assert.match(page, /width: min\(72vw, 560px\)/);
   assert.match(page, /touch-action: manipulation/);
 });
+
+test("rescue theme uses real edge artwork while leaving number tiles plain", async () => {
+  const page = await readFile(siteFile, "utf8");
+
+  assert.match(page, /assets\/rescue-hq-background\.png/);
+  assert.match(page, /assets\/rescue-complete-banner\.png/);
+  assert.match(page, /class="rescue-home-art"/);
+  assert.match(page, /\.rescue-home-art \{ position: fixed; z-index: 0;/);
+  assert.match(page, /\.app \{ position: relative; z-index: 1;/);
+  assert.doesNotMatch(page, /<div class="mascot"[^>]*>☀️<\/div>/);
+  assert.doesNotMatch(page, /<div class="mascot"[^>]*>🏆<\/div>/);
+  assert.doesNotMatch(page, /tile\.rescue/);
+});

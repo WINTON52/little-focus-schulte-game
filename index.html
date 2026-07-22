@@ -13,15 +13,15 @@
       }
 
       * { box-sizing: border-box; }
-      body { margin: 0; min-width: 320px; min-height: 100vh; background: linear-gradient(145deg, #fffbd9, #edfbf3 58%, #e4f8ff); }
+      body { margin: 0; min-width: 320px; min-height: 100vh; background: #f4fbf8; }
       button { font: inherit; }
-      .app { width: min(100%, 900px); min-height: 100vh; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px max(26px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; }
+      .rescue-home-art { position: fixed; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; pointer-events: none; }
+      .app { position: relative; z-index: 1; width: min(100%, 900px); min-height: 100vh; margin: 0 auto; padding: max(210px, 28vh) 20px max(26px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; }
       .hero { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 2px 0 18px; }
-      .brand { margin: 0; font-size: clamp(28px, 6vw, 42px); letter-spacing: .04em; color: #24617f; }
+      .brand { margin: 0; font-size: clamp(28px, 6vw, 42px); letter-spacing: .04em; color: #174f74; text-shadow: 0 2px 0 rgba(255,255,255,.88); }
       .back { border: 0; border-radius: 999px; padding: 12px 18px; color: #2b647e; background: rgba(255,255,255,.9); box-shadow: 0 4px 0 #d5e6e4; font-weight: 800; cursor: pointer; touch-action: manipulation; }
       .back:active, .action:active, .level:active, .tile:active { transform: translateY(3px); box-shadow: none; }
       .home-card, .complete-card { width: min(100%, 650px); padding: clamp(26px, 6vw, 46px); border-radius: 30px; text-align: center; background: rgba(255,255,255,.87); box-shadow: 0 10px 30px rgba(41, 101, 108, .12); }
-      .mascot { font-size: 56px; line-height: 1; }
       h2 { margin: 12px 0 8px; font-size: clamp(28px, 5vw, 38px); color: #285d79; }
       p { margin: 0; line-height: 1.65; font-size: clamp(17px, 3vw, 21px); color: #5d7d85; }
       .level-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
@@ -42,7 +42,8 @@
       .tile { aspect-ratio: 1; min-width: 0; padding: 0; border: 0; border-radius: clamp(12px, 2.8vw, 25px); color: #2e637f; background: #fff; box-shadow: 0 7px 0 #dce9e5; font-size: var(--tile-font-size); font-weight: 950; line-height: 1; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: manipulation; }
       .tile.done { color: #fff; background: #ff9f3f; box-shadow: 0 7px 0 #dc7b1e; }
       .tile:focus-visible, .level:focus-visible, .action:focus-visible, .back:focus-visible { outline: 4px solid #ffc95a; outline-offset: 3px; }
-      .complete-card { margin-top: clamp(35px, 10vh, 110px); }
+      .complete-card { margin-top: clamp(35px, 10vh, 110px); overflow: hidden; }
+      .complete-art { display: block; width: calc(100% + clamp(52px, 9vw, 92px)); max-width: none; height: auto; margin: clamp(-30px, -5vw, -16px) clamp(-46px, -8vw, -26px) 8px; }
       .action { margin-top: 24px; padding: 16px 25px; border: 0; border-radius: 999px; color: #fff; background: #ff8342; box-shadow: 0 6px 0 #da6827; font-size: 21px; font-weight: 900; cursor: pointer; touch-action: manipulation; }
       .best { margin-top: 18px; color: #8a7061; font-size: 16px; }
       @media (min-width: 768px) {
@@ -51,7 +52,7 @@
         .board { width: min(72vw, 560px); }
       }
       @media (max-width: 420px) {
-        .app { padding-left: 14px; padding-right: 14px; }
+        .app { padding-top: max(160px, 23vh); padding-left: 14px; padding-right: 14px; }
         .hero { margin-bottom: 12px; }
         .back { padding: 10px 13px; }
         .tile { box-shadow: 0 5px 0 #dce9e5; }
@@ -61,6 +62,7 @@
     </style>
   </head>
   <body>
+    <img class="rescue-home-art" src="assets/rescue-hq-background.png" alt="" aria-hidden="true" />
     <main class="app" id="app" aria-live="polite"></main>
     <script>
       const MIN_LEVEL = 3;
@@ -129,9 +131,9 @@
           const locked = size > unlocked;
           const best = bestFor(size);
           const status = locked ? "还没解锁" : size === unlocked ? "现在练习" : "可以回练";
-          return `<button class="level ${locked ? "locked" : size === unlocked ? "current" : ""}" data-level="${size}" type="button" ${locked ? "disabled" : ""}>${size} × ${size}<small>${locked ? "🔒 " : ""}${status}${best ? " · 最快 " + timeText(best) : ""}</small></button>`;
+          return `<button class="level ${locked ? "locked" : size === unlocked ? "current" : ""}" data-level="${size}" type="button" ${locked ? "disabled" : ""}>${size} × ${size}<small>${status}${best ? " · 最快 " + timeText(best) : ""}</small></button>`;
         }).join("");
-        app.innerHTML = `${renderHeader(false)}<section class="home-card"><div class="mascot" aria-hidden="true">☀️</div><h2>准备好了吗？</h2><p>从 1 开始，按顺序找到所有数字。<br>每完成一关，下一关就会打开！</p><div class="level-grid">${levels}</div><p class="progress-note">进度和最快时间会保存在这台 iPad 上。</p></section>`;
+        app.innerHTML = `${renderHeader(false)}<section class="home-card"><h2>准备好了吗？</h2><p>从 1 开始，按顺序找到所有数字。<br>每完成一关，下一关就会打开！</p><div class="level-grid">${levels}</div><p class="progress-note">进度和最快时间会保存在这台 iPad 上。</p></section>`;
       }
 
       function renderGame() {
@@ -153,7 +155,7 @@
 
       function renderComplete() {
         const best = bestFor(MAX_LEVEL);
-        app.innerHTML = `${renderHeader(true)}<section class="complete-card"><div class="mascot" aria-hidden="true">🏆</div><h2>太棒啦！全部完成！</h2><p>你已经完成了 3 × 3 到 10 × 10 的所有练习。</p>${best ? `<p class="best">10 × 10 最快：${timeText(best)}</p>` : ""}<button class="action" data-action="home" type="button">回到关卡</button></section>`;
+        app.innerHTML = `${renderHeader(true)}<section class="complete-card"><img class="complete-art" src="assets/rescue-complete-banner.png" alt="救援队为你庆祝" /><h2>太棒啦！全部完成！</h2><p>你已经完成了 3 × 3 到 10 × 10 的所有练习。</p>${best ? `<p class="best">10 × 10 最快：${timeText(best)}</p>` : ""}<button class="action" data-action="home" type="button">回到关卡</button></section>`;
       }
 
       function render() {
