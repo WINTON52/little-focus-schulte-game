@@ -79,7 +79,7 @@ export function migrateProfile(storage) {
 
 export function qualifiesForUnlock(records, size) {
   const recent = records.filter((record) => record.size === size).slice(-3);
-  return recent.filter((record) => record.accuracy >= 0.9 && record.wrongTaps <= 2).length >= 2;
+  return recent.length === 3 && recent.filter((record) => record.accuracy >= 0.9 && record.wrongTaps <= 2).length >= 2;
 }
 
 export function isLevelStable(profile, size) {

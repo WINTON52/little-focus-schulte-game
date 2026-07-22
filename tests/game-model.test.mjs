@@ -36,10 +36,11 @@ test("two qualifying attempts among the three most recent attempts unlock a leve
 
 test("only the current highest unlocked level can advance one step", () => {
   const profile = migrateProfile({ "little-focus-unlocked": "4" });
-  const ready = [record(4), record(4), record(4)];
-  const advanced = ready.reduce((current, next) => completeTraining(current, next), profile);
+  const afterTwo = [record(4), record(4)].reduce((current, next) => completeTraining(current, next), profile);
+  const advanced = completeTraining(afterTwo, record(4));
   const replay = completeTraining(advanced, record(3));
 
+  assert.equal(afterTwo.unlockedLevel, 4);
   assert.equal(advanced.unlockedLevel, 5);
   assert.equal(replay.unlockedLevel, 5);
 });
