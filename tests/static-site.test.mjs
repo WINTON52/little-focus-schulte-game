@@ -4,41 +4,58 @@ import test from "node:test";
 
 const siteFile = new URL("../index.html", import.meta.url);
 
-test("static game keeps the complete 3x3 to 10x10 progression", async () => {
+test("child home has a daily rescue mission and a protected parent entrance", async () => {
   const page = await readFile(siteFile, "utf8");
 
-  assert.match(page, /const MIN_LEVEL = 3;/);
-  assert.match(page, /const MAX_LEVEL = 10;/);
-  assert.match(page, /little-focus-unlocked/);
-  assert.match(page, /localStorage\.setItem\(UNLOCKED_KEY/);
-  assert.match(page, /startGame\(state\.size \+ 1\)/);
+  assert.match(page, /今天的救援任务/);
+  assert.match(page, /给大人看/);
+  assert.match(page, /data-screen="parent-dashboard"/);
+  assert.match(page, /2000/);
 });
 
-test("the answer has no special orange target cue", async () => {
+test("the child path separates daily practice from super challenges", async () => {
   const page = await readFile(siteFile, "utf8");
 
-  assert.match(page, /tile\.className = `tile\$\{value < state\.next \? " done" : ""\}`/);
-  assert.doesNotMatch(page, /tile\.target/);
-  assert.doesNotMatch(page, /classList\.add\("target"\)/);
+  assert.match(page, /超能挑战/);
+  assert.match(page, /3×3/);
+  assert.match(page, /10×10/);
+  assert.doesNotMatch(page, /最快用时|排行榜/);
 });
 
-test("the page includes iPad-friendly board sizing", async () => {
+test("the page loads its training rules as an ES module", async () => {
   const page = await readFile(siteFile, "utf8");
 
-  assert.match(page, /@media \(min-width: 768px\)/);
-  assert.match(page, /width: min\(72vw, 560px\)/);
-  assert.match(page, /touch-action: manipulation/);
+  assert.match(page, /<script type="module">/);
+  assert.match(page, /from "\.\/game-model\.js"/);
 });
 
-test("rescue theme uses real edge artwork while leaving number tiles plain", async () => {
+test("rescue art stays on the outer edge and number tiles have no target styling", async () => {
   const page = await readFile(siteFile, "utf8");
 
   assert.match(page, /assets\/rescue-hq-background\.png/);
   assert.match(page, /assets\/rescue-complete-banner\.png/);
   assert.match(page, /class="rescue-home-art"/);
-  assert.match(page, /\.rescue-home-art \{ position: fixed; z-index: 0;/);
-  assert.match(page, /\.app \{ position: relative; z-index: 1;/);
-  assert.doesNotMatch(page, /<div class="mascot"[^>]*>☀️<\/div>/);
-  assert.doesNotMatch(page, /<div class="mascot"[^>]*>🏆<\/div>/);
-  assert.doesNotMatch(page, /tile\.rescue/);
+  assert.match(page, /data-focus-mode="quiet"/);
+  assert.doesNotMatch(page, /\.tile\.target|classList\.add\(["']target/);
+});
+
+test("the iPad layout uses touch-sized controls and scalable board sizing", async () => {
+  const page = await readFile(siteFile, "utf8");
+
+  assert.match(page, /min-height:\s*44px/);
+  assert.match(page, /clamp\(/);
+  assert.match(page, /touch-action:\s*manipulation/);
+  assert.match(page, /repeat\(var\(--columns\)/);
+});
+
+test("training interaction keeps pauses and mistakes gentle", async () => {
+  const page = await readFile(siteFile, "utf8");
+
+  assert.match(page, /function startTraining/);
+  assert.match(page, /function handleTileTap/);
+  assert.match(page, /state\.paused/);
+  assert.match(page, /1200/);
+  assert.match(page, /先吸一口气，再找/);
+  assert.match(page, /speechSynthesis/);
+  assert.doesNotMatch(page, /wrong.*shake|shake.*wrong/i);
 });
